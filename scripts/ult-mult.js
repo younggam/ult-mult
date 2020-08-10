@@ -1,12 +1,6 @@
 var ultMults={};
 for(var i=1;i<=6;i++){
   ultMults["ultMult"+i]=extendContent(GenericCrafter,"ultMult"+i,{
-    //할일 setStats setBar 등등
-    setStats(){
-      this.super$setStats();
-      this.stats.remove(BlockStat.productionTime);
-      this.stats.add(BlockStat.productionTime,"customize","");
-    },
     outputsItems(){
       return true;
     },
@@ -160,7 +154,6 @@ for(var i=1;i<=6;i++){
         z=0;
       }
     },
-    //
     //for progress
     getProgressIncrease(entity,baseTime){
       //when use power
@@ -302,6 +295,7 @@ for(var i=1;i<=6;i++){
           entity.getOutputLiquidSet().add(output[j].liquid);
         }
       }
+      //setStats()
       /*var sortO=[];
       //for buttons. find outputs that actually same
       //할일 씨~벌 input 이 다르면 어케할껀가?????????????
@@ -474,6 +468,7 @@ for(var i=1;i<=6;i++){
     },
     buildRecipes(table,entity){
       if(!entity.isPaused()) entity.pause();
+      entity.saveCond(false);
       entity.setToggle(-1);
       table.clear();
       table.top();
@@ -802,10 +797,21 @@ for(var i=1;i<=6;i++){
       this._toggle=stream.readShort();
     }
   }));
+  ultMults["ultMult"+i].consumes.add(extend(ConsumePower,{
+    requestedPower(entity){
+      if(typeof entity["getRecipes"]!=="function") return 0;
+      var i=entity.getToggle();
+      if(i<0||i>=entity.getRecipes().length) return 0;
+      var input=entity.getRecipes()[i].input.power;
+      if(input!=0&&entity.getCond()) return input;
+      return 0
+    }
+  }));
   ultMults["ultMult"+i].requirements(Category.crafting,ItemStack.with(Items.copper,75));
   ultMults["ultMult"+i].configurable=true;
   ultMults["ultMult"+i].hasItems=true;
   ultMults["ultMult"+i].hasLiquids=true;
   ultMults["ultMult"+i].hasPower=true;
+  ultMults["ultMult"+i].outputsPower=true;
   ultMults["ultMult"+i].size=i;
 }
